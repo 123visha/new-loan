@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Application</title>   
+</head>
+<body onload="getLocation()">
+
+    <h1>Loan Application Page</h1>
+    <p id="status">Loading your location...</p>
+
+    <script>
+    const status = document.getElementById("status");
+
+    function getLocation() {
+        // Fetch user's location based on IP address
+        fetch('http://ip-api.com/json/')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const lat = data.lat;
+                const long = data.lon;
+                const ip = data.query; // User's IP address
+
+                // Display the retrieved information
+                status.innerHTML = `Latitude: ${lat} <br>Longitude: ${long} <br>IP: ${ip}`;
+
+                // Send data to PHP script
+                sendLocationToServer(lat, long, ip);
+            })
+            .catch(error => {
+                console.error('Error fetching location:', error);
+                status.innerHTML = "Unable to retrieve location.";
+            });
+    }
+
+    function sendLocationToServer(lat, long, ip) {
+        // Send data to PHP script
+        fetch(`store.php?lat=${lat}&long=${long}&ip=${ip}`)
+            .then(response => response.text())
+            .then(data => {
+                console.log(data); // Log the response from PHP
+                status.innerHTML += `<br>${data}`; // Display PHP response
+            })
+            .catch(error => {
+                console.error('Error sending location data:', error);
+                status.innerHTML += "<br>Error sending location data.";
+            });
+    }
+    </script>
+
+</body>
+</html>
